@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Models
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String   // Hashed
+  role      String   @default("BACKOFFICE") // ADMIN, SUPERVISOR, BACKOFFICE
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  createdDemands  Demand[] @relation("CreatedDemands")
+  assignedDemands Demand[] @relation("AssignedDemands")
+  editedDemands   Demand[] @relation("EditedDemands")
+}
+
+model Partner {
+  id            Int            @id @default(autoincrement())
+  nickname      String?
+  nomeFantasia  String?
+  razaoSocial   String?
+  cnpj          String?
+  sapCliente    String?
+  sapFornecedor String?
+  collaborators Collaborator[]
+  demands       Demand[]
+}
+
+model Collaborator {
+  id        Int      @id @default(autoincrement())
+  partnerId Int
+  partner   Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  nome      String
+  cargo     String?
+  telefone  String?
+  matricula String?
+  demands   Demand[]
+}
+
+model Category {
+  id      Int      @id @default(autoincrement())
+  name    String
+  demands Demand[]
+}
+
+model Demand {
+  id             Int          @id @default(autoincrement())
+  partnerId      Int
+  partner        Partner      @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  collaboratorId Int?
+  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id])
+  categoryId     Int?
+  category       Category?    @relation(fields: [categoryId], references: [id])
+  creatorId      Int?
+  creator        User?        @relation("CreatedDemands", fields: [creatorId], references: [id])
+  
+  assigneeId     Int?
+  assignee       User?        @relation("AssignedDemands", fields: [assigneeId], references: [id])
+  
+  editorId       Int?
+  editor         User?        @relation("EditedDemands", fields: [editorId], references: [id])
+  
+  tipo           String?
+  urgencia       String       @default("MEDIA") // BAIXA, MEDIA, ALTA, URGENTE
+  criadaEm       DateTime     @default(now())
+  atualizadaEm   DateTime     @updatedAt
+  prazo          DateTime?
+  descricao      String?
+  status         String       @default("ABERTA") // ABERTA, EM_ANDAMENTO, CONCLUIDA, CANCELADA, ATRASADA
+  
+  subDemands     SubDemand[]
+}
+
+model SubDemand {
+  id          Int       @id @default(autoincrement())
+  demandId    Int
+  demand      Demand    @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  titulo      String
+  descricao   String?
+  prazo       DateTime?
+  
+  subSteps    SubStep[]
+}
+
+model SubStep {
+  id          Int        @id @default(autoincrement())
+  subDemandId Int
+  subDemand   SubDemand  @relation(fields: [subDemandId], references: [id], onDelete: Cascade)
+  nome        String
+  status      String     @default("PENDENTE") // PENDENTE, CONCLUIDA
+  prazo       DateTime?
+  observacoes String?
+  ordem       Int?
+}

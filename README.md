@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# i9 Alpha
 
-## Getting Started
+Sistema de Gestão de Demandas (i9 Alpha)
 
-First, run the development server:
+## Sobre o Projeto
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Este é um sistema de gestão de demandas desenvolvido com Next.js, Prisma e Tailwind CSS.
+O sistema permite o gerenciamento de demandas com controle de acesso baseado em cargos (RBAC).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Funcionalidades
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Autenticação**: Login seguro com NextAuth.
+- **Gestão de Demandas**: Criação, edição e visualização de demandas.
+- **Controle de Acesso (RBAC)**:
+  - **Admin**: Acesso total.
+  - **Supervisor**: Gerencia demandas próprias e de Backoffice.
+  - **Backoffice**: Gerencia apenas demandas próprias.
+- **Dashboard**: Visão geral das demandas, status e atrasos.
+- **Exportação**: Exportação de dados (Excel/PDF).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Tecnologias Utilizadas
 
-## Learn More
+- **Frontend**: Next.js 14 (App Router), React, Tailwind CSS, Shadcn UI.
+- **Backend**: Next.js API Routes.
+- **Banco de Dados**: PostgreSQL (via Prisma ORM).
+- **Autenticação**: NextAuth.js.
 
-To learn more about Next.js, take a look at the following resources:
+## Como Rodar Localmente
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/Andre-Brito-py/i9_alpha.git
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+3. Configure as variáveis de ambiente:
+   Crie um arquivo `.env` na raiz do projeto com as chaves necessárias (ver `.env.example` se houver, ou consulte o administrador).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Configure o banco de dados:
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+
+6. Acesse `http://localhost:3000`.
+
+## Deploy
+
+Veja o arquivo [README_DEPLOY.md](./README_DEPLOY.md) para instruções detalhadas de deploy na Vercel com Neon (PostgreSQL).
