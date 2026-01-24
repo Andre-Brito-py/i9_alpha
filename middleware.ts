@@ -13,6 +13,7 @@ export default withAuth(
     pages: {
       signIn: "/login",
     },
+    secret: process.env.NEXTAUTH_SECRET,
   }
 )
 
