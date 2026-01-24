@@ -26,10 +26,8 @@ O sistema permite o gerenciamento de demandas com controle de acesso baseado em 
   - **Admin**: Acesso total (Cria/Edita para todos).
   - **Supervisor**: Gerencia demandas próprias e de Backoffice.
   - **Backoffice**: Gerencia apenas demandas próprias.
-- **Dashboard**:
-  - Visão geral das demandas.
-  - Contagem automática de demandas atrasadas.
-  - Indicadores de status e urgência.
+- **Dashboard Interativo**: Gráficos e métricas em tempo real.
+- **Responsividade**: Sidebar colapsável e menu mobile para melhor navegação em telas pequenas.
 - **Exportação**: Exportação de dados (Excel/PDF).
 
 ## Tecnologias Utilizadas
