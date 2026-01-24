@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
@@ -10,7 +11,9 @@ import {
   Settings, 
   LogOut,
   Building2,
-  ListTodo
+  ListTodo,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -20,6 +23,7 @@ export default function Sidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const role = session?.user?.role
+  const [collapsed, setCollapsed] = useState(false)
 
   const routes = [
     {
@@ -70,40 +74,67 @@ export default function Sidebar() {
   )
 
   return (
-    <div className="space-y-4 py-4 flex flex-col h-full bg-gray-900 text-white w-64">
-      <div className="px-3 py-2 flex-1">
-        <Link href="/dashboard" className="flex items-center pl-3 mb-14">
-          <h1 className="text-2xl font-bold">i9 Manager</h1>
+    <div 
+      className={cn(
+        "relative flex flex-col h-full bg-gray-900 text-white transition-all duration-300",
+        collapsed ? "w-20" : "w-64"
+      )}
+    >
+      <Button
+        onClick={() => setCollapsed(!collapsed)}
+        variant="ghost"
+        size="icon"
+        className="absolute -right-3 top-6 z-50 h-6 w-6 rounded-full bg-gray-800 text-white border border-gray-700 hover:bg-gray-700 hidden md:flex shadow-md"
+      >
+        {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+      </Button>
+
+      <div className="px-3 py-6 flex-1 overflow-y-auto">
+        <Link href="/dashboard" className={cn("flex items-center mb-10 transition-all", collapsed ? "justify-center" : "pl-3")}>
+          <h1 className={cn("font-bold transition-all duration-300 whitespace-nowrap overflow-hidden", collapsed ? "text-xl" : "text-2xl")}>
+            {collapsed ? "i9" : "i9 Manager"}
+          </h1>
         </Link>
+        
         <div className="space-y-1">
           {filteredRoutes.map((route) => (
             <Link
               key={route.href}
               href={route.href}
               className={cn(
-                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
-                pathname === route.href ? "text-white bg-white/10" : "text-zinc-400"
+                "text-sm group flex p-3 w-full font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition-all",
+                pathname === route.href ? "text-white bg-white/10" : "text-zinc-400",
+                collapsed ? "justify-center" : "justify-start"
               )}
+              title={collapsed ? route.label : undefined}
             >
-              <div className="flex items-center flex-1">
-                <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
-                {route.label}
+              <div className={cn("flex items-center transition-all", collapsed ? "justify-center" : "flex-1")}>
+                <route.icon className={cn("h-5 w-5", route.color, collapsed ? "mr-0" : "mr-3")} />
+                <span className={cn("transition-all duration-300 overflow-hidden whitespace-nowrap", collapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100 block")}>
+                  {route.label}
+                </span>
               </div>
             </Link>
           ))}
         </div>
       </div>
-      <div className="px-3 py-2">
-         <div className="mb-4 px-3 text-xs text-zinc-400">
-            Logado como: <span className="text-white font-bold">{session?.user?.name}</span> ({role})
-         </div>
+      
+      <div className="px-3 py-4">
+         {!collapsed && (
+            <div className="mb-4 px-3 text-xs text-zinc-400 animate-in fade-in duration-300">
+                Logado como: <span className="text-white font-bold block truncate">{session?.user?.name}</span> ({role})
+            </div>
+         )}
          <Button 
             variant="destructive" 
-            className="w-full justify-start"
+            className={cn("w-full transition-all", collapsed ? "justify-center px-0" : "justify-start")}
             onClick={() => signOut({ callbackUrl: "/login" })}
+            title="Sair"
          >
-            <LogOut className="h-5 w-5 mr-3" />
-            Sair
+            <LogOut className={cn("h-5 w-5", collapsed ? "mr-0" : "mr-3")} />
+            <span className={cn("transition-all duration-300 overflow-hidden whitespace-nowrap", collapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100 block")}>
+              Sair
+            </span>
          </Button>
       </div>
     </div>

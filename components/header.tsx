@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { User, LogOut } from "lucide-react"
 import { Notifications } from "@/components/notifications"
+import MobileSidebar from "@/components/mobile-sidebar"
 
 export default function Header() {
   const { data: session } = useSession()
@@ -28,7 +29,7 @@ export default function Header() {
   return (
     <header className="flex h-16 items-center justify-between border-b bg-white px-6">
       <div className="flex items-center gap-4">
-        {/* Mobile menu trigger could go here */}
+        <MobileSidebar />
         <h2 className="text-lg font-semibold text-gray-800">
           Bem-vindo, {session?.user?.name || "Usuário"}
         </h2>

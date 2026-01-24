@@ -16,7 +16,12 @@ O sistema permite o gerenciamento de demandas com controle de acesso baseado em 
   - Cadastro de Lojas/Parceiros com CNPJ.
   - Cadastro de Funcionários vinculados a lojas.
   - Campos formatados e validados (Telefone, Matrícula, CNPJ).
+  - Novos campos: Razão Social, SAP Cliente e SAP Fornecedor.
   - Visualização rápida de detalhes e funcionários ao clicar no apelido do parceiro.
+- **Interface e Responsividade**:
+  - **Sidebar Colapsável**: Otimização de espaço em desktops.
+  - **Menu Mobile**: Navegação adaptada para celulares com menu lateral (Sheet).
+  - Layout fluido e responsivo.
 - **Controle de Acesso (RBAC)**:
   - **Admin**: Acesso total (Cria/Edita para todos).
   - **Supervisor**: Gerencia demandas próprias e de Backoffice.
