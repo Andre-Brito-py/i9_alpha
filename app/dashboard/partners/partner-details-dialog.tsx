@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Partner } from "./columns"
 import { Separator } from "@/components/ui/separator"
+import { formatPhone } from "@/lib/utils"
 import {
   Table,
   TableBody,
@@ -123,7 +124,7 @@ export function PartnerDetailsDialog({ partner, children }: PartnerDetailsDialog
                       <TableRow key={collab.id}>
                         <TableCell className="font-medium">{collab.nome}</TableCell>
                         <TableCell>{collab.cargo || "-"}</TableCell>
-                        <TableCell>{collab.telefone || "-"}</TableCell>
+                        <TableCell>{collab.telefone ? formatPhone(collab.telefone) : "-"}</TableCell>
                         <TableCell>{collab.matricula || "-"}</TableCell>
                       </TableRow>
                     ))}

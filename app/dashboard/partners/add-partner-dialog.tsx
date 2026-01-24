@@ -120,6 +120,17 @@ export function AddPartnerDialog() {
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="razaoSocial" className="text-right">
+                Razão Social
+              </Label>
+              <Input
+                id="razaoSocial"
+                className="col-span-3"
+                {...register("razaoSocial")}
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="cnpj" className="text-right">
                 CNPJ
               </Label>
@@ -134,6 +145,28 @@ export function AddPartnerDialog() {
             {errors.cnpj && (
                <p className="text-sm text-red-500 text-right">{errors.cnpj.message}</p>
             )}
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="sapCliente" className="text-right">
+                SAP Cliente
+              </Label>
+              <Input
+                id="sapCliente"
+                className="col-span-3"
+                {...register("sapCliente")}
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="sapFornecedor" className="text-right">
+                SAP Fornec.
+              </Label>
+              <Input
+                id="sapFornecedor"
+                className="col-span-3"
+                {...register("sapFornecedor")}
+              />
+            </div>
           </div>
           
           {error && (
