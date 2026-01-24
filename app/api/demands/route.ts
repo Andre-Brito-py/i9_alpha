@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 
 const demandSchema = z.object({
   partnerId: z.coerce.number().min(1, "Parceiro é obrigatório"),
+  collaboratorId: z.coerce.number().optional().nullable(),
   assigneeId: z.coerce.number().min(1, "Responsável é obrigatório"),
   tipo: z.string().min(1, "Tipo é obrigatório"),
   urgencia: z.string().default("MEDIA"),
@@ -27,19 +28,24 @@ export async function GET() {
       orderBy: { criadaEm: 'desc' },
       include: {
         partner: {
-          select: { nickname: true }
+          select: { id: true, nickname: true }
         },
         collaborator: {
-          select: { nome: true }
+          select: { id: true, nome: true }
         },
         creator: {
-          select: { name: true }
+          select: { id: true, name: true }
         },
         assignee: {
-          select: { name: true }
+          select: { id: true, name: true }
         },
         editor: {
-          select: { name: true }
+          select: { id: true, name: true }
+        },
+        subDemands: {
+          include: {
+            subSteps: true
+          }
         }
       }
     })
@@ -88,6 +94,7 @@ export async function POST(req: Request) {
     const demand = await prisma.demand.create({
       data: {
         partnerId: validatedData.partnerId,
+        collaboratorId: validatedData.collaboratorId,
         creatorId: creatorId,
         assigneeId: validatedData.assigneeId,
         tipo: validatedData.tipo,

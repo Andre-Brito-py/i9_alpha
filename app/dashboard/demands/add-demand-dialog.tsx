@@ -39,6 +39,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const demandSchema = z.object({
   partnerId: z.string().min(1, "Parceiro é obrigatório"),
+  collaboratorId: z.string().optional(),
   assigneeId: z.string().min(1, "Responsável é obrigatório"),
   tipo: z.string().min(1, "Tipo é obrigatório"),
   urgencia: z.string().min(1, "Urgência é obrigatória"),
@@ -53,6 +54,11 @@ type PartnerOption = {
   nickname: string
 }
 
+type CollaboratorOption = {
+  id: number
+  nome: string
+}
+
 type UserOption = {
   id: number
   name: string
@@ -64,6 +70,7 @@ export function AddDemandDialog() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [partners, setPartners] = useState<PartnerOption[]>([])
+  const [collaborators, setCollaborators] = useState<CollaboratorOption[]>([])
   const [users, setUsers] = useState<UserOption[]>([])
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<DemandFormValues>({
@@ -72,6 +79,20 @@ export function AddDemandDialog() {
       urgencia: "MEDIA"
     }
   })
+
+  const selectedPartnerId = watch("partnerId")
+
+  useEffect(() => {
+    if (selectedPartnerId) {
+      // Fetch collaborators for selected partner
+      fetch(`/api/collaborators?partnerId=${selectedPartnerId}`)
+        .then(res => res.json())
+        .then(data => setCollaborators(data))
+        .catch(err => console.error("Failed to fetch collaborators", err))
+    } else {
+      setCollaborators([])
+    }
+  }, [selectedPartnerId])
 
   useEffect(() => {
     // Fetch partners and users
@@ -115,6 +136,7 @@ export function AddDemandDialog() {
         body: JSON.stringify({
           ...data,
           partnerId: parseInt(data.partnerId), // Convert to number for API
+          collaboratorId: data.collaboratorId ? parseInt(data.collaboratorId) : null,
           prazo: data.prazo ? data.prazo.toISOString() : null
         }),
       })
@@ -173,6 +195,26 @@ export function AddDemandDialog() {
                 {errors.partnerId && (
                    <p className="text-sm text-red-500 mt-1">{errors.partnerId.message}</p>
                 )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="collaborator" className="text-right">
+                Colaborador
+              </Label>
+              <div className="col-span-3">
+                <Select onValueChange={(val) => setValue("collaboratorId", val)} disabled={!selectedPartnerId || collaborators.length === 0}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={!selectedPartnerId ? "Selecione um parceiro primeiro" : (collaborators.length === 0 ? "Nenhum colaborador encontrado" : "Selecione um colaborador (opcional)")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {collaborators.map((collab) => (
+                      <SelectItem key={collab.id} value={collab.id.toString()}>
+                        {collab.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

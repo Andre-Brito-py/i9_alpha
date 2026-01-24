@@ -12,6 +12,7 @@ export type DemandColumn = {
     nickname: string | null
   }
   collaborator: {
+    id: number
     nome: string
   } | null
   creator: {

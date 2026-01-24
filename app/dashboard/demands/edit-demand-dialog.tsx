@@ -36,9 +36,11 @@ import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { DemandColumn } from "./types"
+import { SubDemandList } from "./sub-demand-list"
 
 const demandSchema = z.object({
   partnerId: z.string().min(1, "Parceiro é obrigatório"),
+  collaboratorId: z.string().optional(),
   assigneeId: z.string().min(1, "Responsável é obrigatório"),
   tipo: z.string().min(1, "Tipo é obrigatório"),
   urgencia: z.string().min(1, "Urgência é obrigatória"),
@@ -52,6 +54,11 @@ type DemandFormValues = z.infer<typeof demandSchema>
 type PartnerOption = {
   id: number
   nickname: string
+}
+
+type CollaboratorOption = {
+  id: number
+  nome: string
 }
 
 type UserOption = {
@@ -70,12 +77,14 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [partners, setPartners] = useState<PartnerOption[]>([])
+  const [collaborators, setCollaborators] = useState<CollaboratorOption[]>([])
   const [users, setUsers] = useState<UserOption[]>([])
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<DemandFormValues>({
     resolver: zodResolver(demandSchema),
     defaultValues: {
       partnerId: demand.partner.id.toString(),
+      collaboratorId: demand.collaborator?.id?.toString() || "",
       assigneeId: demand.assignee?.id.toString() || "",
       tipo: demand.tipo || "",
       urgencia: demand.urgencia,
@@ -85,11 +94,14 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
     }
   })
 
+  const selectedPartnerId = watch("partnerId")
+
   // Update form values when demand changes
   useEffect(() => {
     if (demand) {
       setValue("partnerId", demand.partner.id.toString())
-      setValue("assigneeId", demand.assignee?.id.toString() || "")
+      setValue("collaboratorId", demand.collaborator?.id?.toString() || "")
+      setValue("assigneeId", demand.assignee?.id?.toString() || "")
       setValue("tipo", demand.tipo || "")
       setValue("urgencia", demand.urgencia)
       setValue("status", demand.status)
@@ -97,6 +109,18 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
       setValue("descricao", demand.descricao || "")
     }
   }, [demand, setValue])
+
+  useEffect(() => {
+    if (selectedPartnerId) {
+      // Fetch collaborators for selected partner
+      fetch(`/api/collaborators?partnerId=${selectedPartnerId}`)
+        .then(res => res.json())
+        .then(data => setCollaborators(data))
+        .catch(err => console.error("Failed to fetch collaborators", err))
+    } else {
+      setCollaborators([])
+    }
+  }, [selectedPartnerId])
 
   useEffect(() => {
     // Fetch partners and users
@@ -137,6 +161,7 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
         body: JSON.stringify({
           ...data,
           partnerId: parseInt(data.partnerId),
+          collaboratorId: data.collaboratorId ? parseInt(data.collaboratorId) : null,
           prazo: data.prazo ? data.prazo.toISOString() : null
         }),
       })
@@ -193,6 +218,30 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
                 {errors.partnerId && (
                    <p className="text-sm text-red-500 mt-1">{errors.partnerId.message}</p>
                 )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="collaborator" className="text-right">
+                Colaborador
+              </Label>
+              <div className="col-span-3">
+                <Select 
+                  onValueChange={(val) => setValue("collaboratorId", val)} 
+                  disabled={!selectedPartnerId || collaborators.length === 0}
+                  defaultValue={demand.collaborator?.id?.toString()}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={!selectedPartnerId ? "Selecione um parceiro primeiro" : (collaborators.length === 0 ? "Nenhum colaborador encontrado" : "Selecione um colaborador (opcional)")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {collaborators.map((collab) => (
+                      <SelectItem key={collab.id} value={collab.id.toString()}>
+                        {collab.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -333,6 +382,8 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
             </Button>
           </DialogFooter>
         </form>
+        
+        <SubDemandList demandId={demand.id} />
       </DialogContent>
     </Dialog>
   )

@@ -10,6 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { PartnerActions } from "./partner-actions"
 
 export type Partner = {
   id: number
@@ -25,6 +26,8 @@ export type Partner = {
   }
 }
 
+import { PartnerDetailsDialog } from "./partner-details-dialog"
+
 export const columns: ColumnDef<Partner>[] = [
   {
     accessorKey: "nickname",
@@ -38,6 +41,16 @@ export const columns: ColumnDef<Partner>[] = [
           Apelido
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const partner = row.original
+      return (
+        <PartnerDetailsDialog partner={partner}>
+          <Button variant="link" className="p-0 h-auto font-medium text-primary hover:underline">
+            {partner.nickname}
+          </Button>
+        </PartnerDetailsDialog>
       )
     },
   },
@@ -55,29 +68,6 @@ export const columns: ColumnDef<Partner>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const partner = row.original
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(partner.id.toString())}
-            >
-              Copiar ID
-            </DropdownMenuItem>
-            <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
-            <DropdownMenuItem>Editar</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
+    cell: ({ row }) => <PartnerActions partner={row.original} />,
   },
 ]

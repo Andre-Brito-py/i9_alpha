@@ -12,7 +12,17 @@ async function getStats() {
     prisma.demand.count(),
     prisma.partner.count(),
     prisma.demand.count({ where: { status: "ABERTA" } }),
-    prisma.demand.count({ where: { status: "ATRASADA" } }),
+    prisma.demand.count({
+      where: {
+        OR: [
+          { status: "ATRASADA" },
+          {
+            status: { notIn: ["CONCLUIDA", "CANCELADA"] },
+            prazo: { lt: new Date() }
+          }
+        ]
+      }
+    }),
   ])
 
   return {

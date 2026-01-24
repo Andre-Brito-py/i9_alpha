@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic'
 
 const demandSchema = z.object({
   partnerId: z.coerce.number().min(1, "Parceiro é obrigatório"),
+  collaboratorId: z.coerce.number().optional().nullable(),
   assigneeId: z.coerce.number().min(1, "Responsável é obrigatório"),
   tipo: z.string().min(1, "Tipo é obrigatório"),
   urgencia: z.string().default("MEDIA"),
@@ -83,6 +84,7 @@ export async function PUT(
       where: { id: demandId },
       data: {
         partnerId: validatedData.partnerId,
+        collaboratorId: validatedData.collaboratorId,
         assigneeId: validatedData.assigneeId,
         editorId: userId,
         tipo: validatedData.tipo,

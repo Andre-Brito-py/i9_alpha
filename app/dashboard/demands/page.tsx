@@ -12,19 +12,19 @@ async function getDemands(): Promise<DemandColumn[]> {
       orderBy: { criadaEm: 'desc' },
       include: {
         partner: {
-          select: { nickname: true }
+          select: { id: true, nickname: true }
         },
         collaborator: {
-          select: { nome: true }
+          select: { id: true, nome: true }
         },
         creator: {
-          select: { name: true }
+          select: { id: true, name: true }
         },
         assignee: {
           select: { id: true, name: true, role: true }
         },
         editor: {
-          select: { name: true }
+          select: { id: true, name: true }
         }
       }
     })

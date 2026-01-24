@@ -7,6 +7,8 @@ import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { Plus } from "lucide-react"
 
+import { formatCNPJ, validateCNPJ } from "@/lib/utils"
+
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -25,7 +27,7 @@ const partnerSchema = z.object({
   nickname: z.string().min(1, "Apelido é obrigatório"),
   nomeFantasia: z.string().optional(),
   razaoSocial: z.string().optional(),
-  cnpj: z.string().optional(),
+  cnpj: z.string().optional().refine((val) => !val || validateCNPJ(val), "CNPJ inválido"),
   sapCliente: z.string().optional(),
   sapFornecedor: z.string().optional(),
 })
@@ -38,9 +40,15 @@ export function AddPartnerDialog() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<PartnerFormValues>({
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<PartnerFormValues>({
     resolver: zodResolver(partnerSchema),
   })
+
+  const handleCNPJChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCNPJ(e.target.value)
+    e.target.value = formatted
+    setValue("cnpj", formatted)
+  }
 
   const onSubmit = async (data: PartnerFormValues) => {
     setLoading(true)
@@ -119,8 +127,13 @@ export function AddPartnerDialog() {
                 id="cnpj"
                 className="col-span-3"
                 {...register("cnpj")}
+                onChange={handleCNPJChange}
+                maxLength={18}
               />
             </div>
+            {errors.cnpj && (
+               <p className="text-sm text-red-500 text-right">{errors.cnpj.message}</p>
+            )}
           </div>
           
           {error && (
