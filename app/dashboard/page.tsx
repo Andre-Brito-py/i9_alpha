@@ -2,7 +2,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ListTodo, Building2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = 'force-dynamic'
+
+async function updateDelayedDemands() {
+  try {
+    await prisma.demand.updateMany({
+      where: {
+        status: { notIn: ["CONCLUIDA", "CANCELADA", "ATRASADA"] },
+        prazo: { lt: new Date() }
+      },
+      data: {
+        status: "ATRASADA"
+      }
+    })
+  } catch (error) {
+    console.error("Erro ao atualizar demandas atrasadas:", error)
+  }
+}
+
 async function getStats() {
+  await updateDelayedDemands()
+
   const [
     totalDemands, 
     totalPartners, 
