@@ -31,6 +31,10 @@ O sistema permite o gerenciamento de demandas com controle de acesso baseado em 
 - **Responsividade**: Sidebar colapsável e menu mobile para melhor navegação em telas pequenas.
 - **Exportação**: Exportação de dados (Excel/PDF).
 
+## Licença
+
+Este projeto está sob a licença MIT.
+
 ## Tecnologias Utilizadas
 
 - **Frontend**: Next.js 14 (App Router), React, Tailwind CSS, Shadcn UI.
