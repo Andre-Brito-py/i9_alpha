@@ -27,6 +27,7 @@ O sistema permite o gerenciamento de demandas com controle de acesso baseado em 
   - **Supervisor**: Gerencia demandas próprias e de Backoffice.
   - **Backoffice**: Gerencia apenas demandas próprias.
 - **Dashboard Interativo**: Gráficos e métricas em tempo real.
+- **Atendimento Inteligente**: Integração demonstrativa com WhatsApp Business para suporte via IA.
 - **Responsividade**: Sidebar colapsável e menu mobile para melhor navegação em telas pequenas.
 - **Exportação**: Exportação de dados (Excel/PDF).
 

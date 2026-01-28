@@ -13,7 +13,10 @@ import {
   Building2,
   ListTodo,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Bot,
+  FileSpreadsheet,
+  UserCog
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -42,30 +45,37 @@ export default function Sidebar() {
     },
     {
       label: "Parceiros",
-      icon: Building2,
+      icon: Users,
       href: "/dashboard/partners",
       color: "text-pink-700",
       roles: ["ADMIN", "SUPERVISOR", "BACKOFFICE"],
     },
     {
       label: "Exportar",
-      icon: FileText,
+      icon: FileSpreadsheet,
       href: "/dashboard/export",
-      color: "text-green-600",
+      color: "text-emerald-500",
       roles: ["ADMIN", "SUPERVISOR", "BACKOFFICE"],
     },
     {
       label: "Usuários",
-      icon: Users,
+      icon: UserCog,
       href: "/dashboard/users",
       color: "text-orange-700",
       roles: ["ADMIN"],
     },
     {
+      label: "Atendimento IA",
+      icon: Bot,
+      href: "/dashboard/support",
+      color: "text-blue-600",
+      roles: ["ADMIN", "SUPERVISOR", "BACKOFFICE"],
+    },
+    {
       label: "Configurações",
       icon: Settings,
       href: "/dashboard/settings",
-      roles: ["ADMIN", "SUPERVISOR"],
+      roles: ["ADMIN", "SUPERVISOR", "BACKOFFICE"],
     },
   ]
 
