@@ -172,7 +172,7 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
           const uploadData = await uploadRes.json()
           evidenceUrl = uploadData.url
         } else {
-          console.error("Failed to upload evidence")
+          throw new Error("Falha ao fazer upload da evidência de conclusão. Por favor, tente novamente.")
         }
       }
 
@@ -360,16 +360,12 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
                   Evidência (Conclusão)
                 </Label>
                 <div className="col-span-3">
-                  <Input
+                  <ImageUpload
                     id="evidenceFinish"
-                    type="file"
-                    accept="image/*"
+                    value={demand.evidenceFinish || ""}
+                    onChange={setFile}
+                    label="Arraste ou clique para anexar evidência de conclusão"
                   />
-                  {demand.evidenceFinish && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Já existe uma evidência anexada. Se desejar alterá-la, selecione um novo arquivo.
-                    </p>
-                  )}
                 </div>
               </div>
             )}

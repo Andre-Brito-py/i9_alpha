@@ -219,7 +219,7 @@ export function AddDemandDialog() {
           const uploadData = await uploadRes.json()
           evidenceUrl = uploadData.url
         } else {
-          console.error("Failed to upload evidence")
+          throw new Error("Falha ao fazer upload da evidência. Por favor, tente novamente.")
         }
       }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { Upload, X, FileImage, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -14,14 +14,21 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({
+    value,
     onChange,
     onRemove,
     label = "Arraste uma imagem ou clique para selecionar",
     id = "image-upload"
 }: ImageUploadProps) {
     const [dragActive, setDragActive] = useState(false)
-    const [preview, setPreview] = useState<string | null>(null)
+    const [preview, setPreview] = useState<string | null>(value || null)
     const inputRef = useRef<HTMLInputElement>(null)
+
+    useEffect(() => {
+        if (value) {
+            setPreview(value)
+        }
+    }, [value])
 
     const handleFile = useCallback((file: File) => {
         if (file && file.type.startsWith("image/")) {
