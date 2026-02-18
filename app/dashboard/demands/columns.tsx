@@ -5,8 +5,16 @@ import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
+import { Image as ImageIcon } from "lucide-react"
 import { DemandColumn } from "./types"
+import { DemandNameCell } from "./demand-name-cell"
 import { DemandActions } from "./demand-actions"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export const columns: ColumnDef<DemandColumn>[] = [
   {
@@ -27,6 +35,7 @@ export const columns: ColumnDef<DemandColumn>[] = [
         </Button>
       )
     },
+    cell: ({ row }) => <DemandNameCell demand={row.original} />,
   },
   {
     accessorKey: "tipo",
@@ -41,7 +50,7 @@ export const columns: ColumnDef<DemandColumn>[] = [
       if (urgency === "ALTA") color = "bg-orange-500"
       if (urgency === "URGENTE") color = "bg-red-500"
       if (urgency === "BAIXA") color = "bg-green-500"
-      
+
       return <Badge className={color}>{urgency}</Badge>
     },
   },
@@ -53,7 +62,7 @@ export const columns: ColumnDef<DemandColumn>[] = [
       const prazoStr = row.getValue("prazo") as string
       let isDelayed = false
       let daysDelayed = 0
-      
+
       if (prazoStr && status !== "CONCLUIDA" && status !== "CANCELADA") {
         const prazo = new Date(prazoStr)
         const now = new Date()
@@ -123,6 +132,39 @@ export const columns: ColumnDef<DemandColumn>[] = [
       const date = row.getValue("atualizadaEm") as string
       return format(new Date(date), "dd/MM/yyyy HH:mm")
     },
+  },
+  {
+    id: "evidence",
+    header: "Evidência",
+    cell: ({ row }) => {
+      const hasOpen = !!row.original.evidenceOpen
+      const hasFinish = !!row.original.evidenceFinish
+
+      if (!hasOpen && !hasFinish) return "-"
+
+      return (
+        <TooltipProvider>
+          <div className="flex gap-1">
+            {hasOpen && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <ImageIcon className="h-4 w-4 text-blue-500" />
+                </TooltipTrigger>
+                <TooltipContent>Evidência de Abertura disponível</TooltipContent>
+              </Tooltip>
+            )}
+            {hasFinish && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <ImageIcon className="h-4 w-4 text-green-500" />
+                </TooltipTrigger>
+                <TooltipContent>Evidência de Conclusão disponível</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        </TooltipProvider>
+      )
+    }
   },
   {
     id: "actions",

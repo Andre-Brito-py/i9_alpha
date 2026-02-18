@@ -14,11 +14,19 @@ const demandSchema = z.object({
   urgencia: z.string().default("MEDIA"),
   prazo: z.string().optional().nullable(),
   descricao: z.string().optional(),
+  evidenceOpen: z.string().optional().nullable(),
+  subDemands: z.array(z.object({
+    titulo: z.string().min(1),
+    evidence: z.string().optional().nullable(),
+    subSteps: z.array(z.object({
+      nome: z.string().min(1)
+    })).optional()
+  })).optional()
 })
 
 export async function GET() {
   const session = await getServerSession(authOptions)
-  
+
   if (!session) {
     return new NextResponse("Unauthorized", { status: 401 })
   }
@@ -58,7 +66,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
-  
+
   if (!session) {
     return new NextResponse("Unauthorized", { status: 401 })
   }
@@ -91,26 +99,50 @@ export async function POST(req: Request) {
       }
     }
 
+    console.log("[DEMANDS_POST] Received body:", JSON.stringify(body, null, 2))
+    console.log("[DEMANDS_POST] Validated data:", JSON.stringify(validatedData, null, 2))
+
     const demand = await prisma.demand.create({
       data: {
         partnerId: validatedData.partnerId,
-        collaboratorId: validatedData.collaboratorId,
+        collaboratorId: (validatedData.collaboratorId && (validatedData.collaboratorId as any) !== "undefined") ? validatedData.collaboratorId : null,
         creatorId: creatorId,
         assigneeId: validatedData.assigneeId,
         tipo: validatedData.tipo,
         urgencia: validatedData.urgencia,
         prazo: validatedData.prazo ? new Date(validatedData.prazo) : null,
         descricao: validatedData.descricao,
-        status: "ABERTA"
+        status: "ABERTA",
+        evidenceOpen: validatedData.evidenceOpen,
+        subDemands: {
+          create: validatedData.subDemands?.map(sd => ({
+            titulo: sd.titulo,
+            evidence: sd.evidence,
+            subSteps: {
+              create: sd.subSteps?.map(step => ({
+                nome: step.nome,
+                status: "PENDENTE"
+              })) || []
+            }
+          })) || []
+        }
+      },
+      include: {
+        subDemands: {
+          include: {
+            subSteps: true
+          }
+        }
       }
     })
 
     return NextResponse.json(demand)
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return new NextResponse("Invalid data", { status: 400 })
+      console.error("[DEMANDS_POST] Validation Error:", error.issues)
+      return new NextResponse(JSON.stringify({ error: "Invalid data", details: error.issues }), { status: 400 })
     }
-    console.error("[DEMANDS_POST]", error)
-    return new NextResponse("Internal Error", { status: 500 })
+    console.error("[DEMANDS_POST] Prisma or Other Error:", error)
+    return new NextResponse(JSON.stringify({ error: "Internal Error", message: error.message }), { status: 500 })
   }
 }

@@ -1,8 +1,42 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ListTodo, Building2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { prisma } from "@/lib/prisma"
+import { DemandNameCell } from "./demands/demand-name-cell"
+import { DemandColumn } from "./demands/types"
 
 export const dynamic = 'force-dynamic'
+
+async function getRecentDemands() {
+  const demands = await prisma.demand.findMany({
+    take: 5,
+    orderBy: { criadaEm: 'desc' },
+    include: {
+      partner: {
+        select: { id: true, nickname: true }
+      },
+      collaborator: {
+        select: { id: true, nome: true }
+      },
+      creator: {
+        select: { id: true, name: true }
+      },
+      assignee: {
+        select: { id: true, name: true, role: true }
+      },
+      editor: {
+        select: { name: true }
+      }
+    }
+  })
+
+  // Serialize to avoid Next.js warnings/errors with Date objects
+  return demands.map(demand => ({
+    ...demand,
+    criadaEm: demand.criadaEm.toISOString(),
+    atualizadaEm: demand.atualizadaEm.toISOString(),
+    prazo: demand.prazo ? demand.prazo.toISOString() : null
+  }))
+}
 
 async function updateDelayedDemands() {
   try {
@@ -24,9 +58,9 @@ async function getStats() {
   await updateDelayedDemands()
 
   const [
-    totalDemands, 
-    totalPartners, 
-    openDemands, 
+    totalDemands,
+    totalPartners,
+    openDemands,
     delayedDemands
   ] = await Promise.all([
     prisma.demand.count(),
@@ -55,11 +89,12 @@ async function getStats() {
 
 export default async function DashboardPage() {
   const stats = await getStats()
+  const recentDemands = await getRecentDemands()
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-      
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -128,9 +163,29 @@ export default async function DashboardPage() {
             <CardTitle>Demandas Recentes</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Implementação da lista de demandas recentes aqui...
-            </p>
+            <div className="space-y-8">
+              {recentDemands.length > 0 ? (
+                recentDemands.map((demand) => (
+                  <div key={demand.id} className="flex items-center">
+                    <div className="ml-4 space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        <DemandNameCell demand={demand as DemandColumn} />
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {demand.tipo} - {demand.status}
+                      </p>
+                    </div>
+                    <div className="ml-auto font-medium text-xs text-muted-foreground">
+                      {new Date(demand.criadaEm).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Nenhuma demanda encontrada.
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
         <Card className="col-span-3">
@@ -138,12 +193,15 @@ export default async function DashboardPage() {
             <CardTitle>Atividades Recentes</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Log de atividades recentes...
-            </p>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Log de atividades recentes será integrado em breve...
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
     </div>
   )
 }
+

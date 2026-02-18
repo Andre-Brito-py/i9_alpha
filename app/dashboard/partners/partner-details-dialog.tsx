@@ -43,7 +43,7 @@ export function PartnerDetailsDialog({ partner, children }: PartnerDetailsDialog
 
   useEffect(() => {
     if (open) {
-      setLoading(true)
+      // setLoading(true) is now handled in handleOpenChange or we can just keep it but this lint is strict
       fetch(`/api/collaborators?partnerId=${partner.id}`)
         .then((res) => res.json())
         .then((data) => setCollaborators(data))
@@ -52,8 +52,15 @@ export function PartnerDetailsDialog({ partner, children }: PartnerDetailsDialog
     }
   }, [open, partner.id])
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen)
+    if (newOpen) {
+      setLoading(true)
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
@@ -103,7 +110,7 @@ export function PartnerDetailsDialog({ partner, children }: PartnerDetailsDialog
                 {loading ? "..." : collaborators.length}
               </span>
             </h3>
-            
+
             {loading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

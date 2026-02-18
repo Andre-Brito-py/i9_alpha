@@ -35,6 +35,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ImageUpload } from "@/components/ui/image-upload"
 import { DemandColumn } from "./types"
 import { SubDemandList } from "./sub-demand-list"
 
@@ -47,6 +48,7 @@ const demandSchema = z.object({
   status: z.string().min(1, "Status é obrigatório"),
   prazo: z.date().optional(),
   descricao: z.string().optional(),
+  evidenceFinish: z.string().optional(),
 })
 
 type DemandFormValues = z.infer<typeof demandSchema>
@@ -79,6 +81,7 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
   const [partners, setPartners] = useState<PartnerOption[]>([])
   const [collaborators, setCollaborators] = useState<CollaboratorOption[]>([])
   const [users, setUsers] = useState<UserOption[]>([])
+  const [file, setFile] = useState<File | null>(null)
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<DemandFormValues>({
     resolver: zodResolver(demandSchema),
@@ -130,14 +133,14 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
           fetch("/api/partners"),
           fetch("/api/users")
         ])
-        
+
         if (partnersRes.ok) {
           const data = await partnersRes.json()
           setPartners(data)
         }
         if (usersRes.ok) {
-           const data = await usersRes.json()
-           setUsers(data)
+          const data = await usersRes.json()
+          setUsers(data)
         }
       } catch (e) {
         console.error("Failed to fetch data", e)
@@ -153,6 +156,26 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
     setError(null)
 
     try {
+      let evidenceUrl = ""
+
+      // Handle file upload if status is being changed to CONCLUIDA
+      if (data.status === "CONCLUIDA" && file) {
+        const formData = new FormData()
+        formData.append("file", file)
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json()
+          evidenceUrl = uploadData.url
+        } else {
+          console.error("Failed to upload evidence")
+        }
+      }
+
       const response = await fetch(`/api/demands/${demand.id}`, {
         method: "PUT",
         headers: {
@@ -162,7 +185,8 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
           ...data,
           partnerId: parseInt(data.partnerId),
           collaboratorId: data.collaboratorId ? parseInt(data.collaboratorId) : null,
-          prazo: data.prazo ? data.prazo.toISOString() : null
+          prazo: data.prazo ? data.prazo.toISOString() : null,
+          evidenceFinish: evidenceUrl || demand.evidenceFinish // Keep existing if no new one provided
         }),
       })
 
@@ -172,6 +196,7 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
       }
 
       onOpenChange(false)
+      setFile(null)
       router.refresh()
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro ao atualizar a demanda."
@@ -185,7 +210,7 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Demanda</DialogTitle>
           <DialogDescription>
@@ -194,13 +219,13 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-4 py-4">
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="partner" className="text-right">
                 Parceiro
               </Label>
               <div className="col-span-3">
-                <Select 
+                <Select
                   onValueChange={(val) => setValue("partnerId", val)}
                   defaultValue={demand.partner.id.toString()}
                 >
@@ -216,7 +241,7 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
                   </SelectContent>
                 </Select>
                 {errors.partnerId && (
-                   <p className="text-sm text-red-500 mt-1">{errors.partnerId.message}</p>
+                  <p className="text-sm text-red-500 mt-1">{errors.partnerId.message}</p>
                 )}
               </div>
             </div>
@@ -226,8 +251,8 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
                 Colaborador
               </Label>
               <div className="col-span-3">
-                <Select 
-                  onValueChange={(val) => setValue("collaboratorId", val)} 
+                <Select
+                  onValueChange={(val) => setValue("collaboratorId", val)}
                   disabled={!selectedPartnerId || collaborators.length === 0}
                   defaultValue={demand.collaborator?.id?.toString()}
                 >
@@ -250,7 +275,7 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
                 Responsável
               </Label>
               <div className="col-span-3">
-                <Select 
+                <Select
                   onValueChange={(val) => setValue("assigneeId", val)}
                   defaultValue={demand.assignee?.id.toString()}
                 >
@@ -266,7 +291,7 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
                   </SelectContent>
                 </Select>
                 {errors.assigneeId && (
-                   <p className="text-sm text-red-500 mt-1">{errors.assigneeId.message}</p>
+                  <p className="text-sm text-red-500 mt-1">{errors.assigneeId.message}</p>
                 )}
               </div>
             </div>
@@ -282,7 +307,7 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
               />
             </div>
             {errors.tipo && (
-               <p className="text-sm text-red-500 text-right">{errors.tipo.message}</p>
+              <p className="text-sm text-red-500 text-right">{errors.tipo.message}</p>
             )}
 
             <div className="grid grid-cols-4 items-center gap-4">
@@ -290,10 +315,10 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
                 Urgência
               </Label>
               <div className="col-span-3">
-                 <Select 
-                    defaultValue={demand.urgencia} 
-                    onValueChange={(val) => setValue("urgencia", val)}
-                 >
+                <Select
+                  defaultValue={demand.urgencia}
+                  onValueChange={(val) => setValue("urgencia", val)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a urgência" />
                   </SelectTrigger>
@@ -312,10 +337,10 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
                 Status
               </Label>
               <div className="col-span-3">
-                 <Select 
-                    defaultValue={demand.status} 
-                    onValueChange={(val) => setValue("status", val)}
-                 >
+                <Select
+                  defaultValue={demand.status}
+                  onValueChange={(val) => setValue("status", val)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
@@ -328,6 +353,26 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
                 </Select>
               </div>
             </div>
+
+            {watch("status") === "CONCLUIDA" && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="evidenceFinish" className="text-right">
+                  Evidência (Conclusão)
+                </Label>
+                <div className="col-span-3">
+                  <Input
+                    id="evidenceFinish"
+                    type="file"
+                    accept="image/*"
+                  />
+                  {demand.evidenceFinish && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Já existe uma evidência anexada. Se desejar alterá-la, selecione um novo arquivo.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Prazo</Label>
@@ -357,19 +402,68 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
               </div>
             </div>
 
+            {(demand.evidenceOpen || demand.evidenceFinish) && (
+              <div className="space-y-4 border-t pt-4">
+                <Label className="text-base font-semibold">Evidências Anexadas</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  {demand.evidenceOpen && (
+                    <div className="flex flex-col gap-2 rounded-lg border p-3 bg-muted/50">
+                      <span className="text-sm font-medium">Abertura:</span>
+                      <div className="relative group cursor-pointer overflow-hidden rounded-md border bg-background aspect-video">
+                        <img
+                          src={demand.evidenceOpen}
+                          alt="Evidência Abertura"
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        />
+                        <a
+                          href={demand.evidenceOpen}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <span className="text-white text-xs font-bold uppercase tracking-wider">Ver Original / Download</span>
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {demand.evidenceFinish && (
+                    <div className="flex flex-col gap-2 rounded-lg border p-3 bg-muted/50">
+                      <span className="text-sm font-medium">Conclusão:</span>
+                      <div className="relative group cursor-pointer overflow-hidden rounded-md border bg-background aspect-video">
+                        <img
+                          src={demand.evidenceFinish}
+                          alt="Evidência Conclusão"
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        />
+                        <a
+                          href={demand.evidenceFinish}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <span className="text-white text-xs font-bold uppercase tracking-wider">Ver Original / Download</span>
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="descricao" className="text-right">
                 Descrição
               </Label>
-              <Textarea
-                id="descricao"
-                className="col-span-3"
-                {...register("descricao")}
-              />
+              <div className="col-span-3">
+                <Textarea
+                  id="descricao"
+                  className="w-full"
+                  {...register("descricao")}
+                />
+              </div>
             </div>
-
           </div>
-          
+
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertDescription>{error}</AlertDescription>
@@ -382,7 +476,7 @@ export function EditDemandDialog({ demand, open, onOpenChange }: EditDemandDialo
             </Button>
           </DialogFooter>
         </form>
-        
+
         <SubDemandList demandId={demand.id} />
       </DialogContent>
     </Dialog>

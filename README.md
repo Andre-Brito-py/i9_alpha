@@ -1,90 +1,81 @@
-# i9 Alpha
+# i9 Alpha - Sistema de Gestão de Demandas
 
-Sistema de Gestão de Demandas (i9 Alpha)
+Sistema corporativo de alta performance para gestão de demandas, focado em rastreabilidade, controle de acesso e experiência do usuário premium.
 
-## Sobre o Projeto
+## 🚀 Sobre o Projeto
 
-Este é um sistema de gestão de demandas desenvolvido com Next.js, Prisma e Tailwind CSS.
-O sistema permite o gerenciamento de demandas com controle de acesso baseado em cargos (RBAC).
+O **i9 Alpha** é uma solução robusta desenvolvida para otimizar o fluxo de trabalho entre equipes, parceiros e colaboradores. Com uma interface moderna inspirada no ecossistema SaaS de elite, o sistema oferece controle total sobre o ciclo de vida das demandas.
 
-## Funcionalidades
+## ✨ Principais Funcionalidades
 
-- **Autenticação**: Login seguro com NextAuth.
-- **Gestão de Demandas**: Criação, edição e visualização de demandas.
-  - **Sub-demandas e Etapas**: Divisão de demandas em tarefas menores com controle de progresso.
-- **Gestão de Parceiros e Colaboradores**:
-  - Cadastro de Lojas/Parceiros com CNPJ.
-  - Cadastro de Funcionários vinculados a lojas.
-  - Campos formatados e validados (Telefone, Matrícula, CNPJ).
-  - Novos campos: Razão Social, SAP Cliente e SAP Fornecedor.
-  - Visualização rápida de detalhes e funcionários ao clicar no apelido do parceiro.
-- **Interface e Responsividade**:
-  - **Sidebar Colapsável**: Otimização de espaço em desktops.
-  - **Menu Mobile**: Navegação adaptada para celulares com menu lateral (Sheet).
-  - Layout fluido e responsivo.
-- **Controle de Acesso (RBAC)**:
-  - **Admin**: Acesso total (Cria/Edita para todos).
-  - **Supervisor**: Gerencia demandas próprias e de Backoffice.
-  - **Backoffice**: Gerencia apenas demandas próprias.
-- **Dashboard Interativo**: Gráficos e métricas em tempo real.
-- **Atendimento Inteligente**: Integração demonstrativa com WhatsApp Business para suporte via IA.
-- **Responsividade**: Sidebar colapsável e menu mobile para melhor navegação em telas pequenas.
-- **Exportação**: Exportação de dados (Excel/PDF).
+- **🔐 Segurança Dinâmica**: 
+  - Autenticação avançada com NextAuth.js.
+  - **RBAC (Role Based Access Control)**: Permissões granuladas para Admin, Supervisor e Backoffice.
+- **📋 Ciclo de Vida de Demandas**: 
+  - Gestão de demandas com suporte a sub-demandas e evidências anexas.
+  - Controle de prazos inteligente com status automático de "Atrasada".
+- **🏪 Ecossistema de Parceiros**:
+  - Catálogo completo de lojas e parceiros com validações fiscais (CNPJ).
+  - Gestão de colaboradores vinculados a unidades específicas.
+  - Integração com dados SAP (Cliente/Fornecedor).
+- **📊 Dashboard Analítico**: Visualização clara de KPIs e métricas de desempenho.
+- **🤖 Suporte Assistido**: Módulo demonstrativo de atendimento via IA integrada ao WhatsApp.
+- **📱 UX Transversal**: Interface 100% responsiva com sidebar inteligente e navegação mobile otimizada.
 
-## Licença
+## 🛠️ Stack Tecnológica
 
-Este projeto está sob a licença MIT.
+- **Core**: [Next.js](https://nextjs.org/) (App Router) + [TypeScript](https://www.typescriptlang.org/)
+- **UI/UX**: [Tailwind CSS](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/), [Lucide React](https://lucide.dev/)
+- **Data Layer**: [Prisma ORM](https://www.prisma.io/) + PostgreSQL (Neon)
+- **State & Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- **Auth**: [NextAuth.js](https://next-auth.js.org/)
+- **Utilities**: [Date-fns](https://date-fns.org/), [XLSX](https://sheetjs.com/)
 
-## Tecnologias Utilizadas
+## 🔧 Configuração e Instalação
 
-- **Frontend**: Next.js 14 (App Router), React, Tailwind CSS, Shadcn UI.
-- **Backend**: Next.js API Routes.
-- **Banco de Dados**: PostgreSQL (via Prisma ORM) - Configurado para deploy na Vercel/Neon.
-- **Autenticação**: NextAuth.js.
+### Pré-requisitos
+- Node.js (v18+)
+- PostgreSQL (pode ser via Neon.tech)
 
-## Como Rodar Localmente
+### Passo a Passo
 
-1. Clone o repositório:
+1. **Clonar e Instalar**:
    ```bash
    git clone https://github.com/Andre-Brito-py/i9_alpha.git
-   ```
-
-2. Instale as dependências:
-   ```bash
+   cd i9_alpha/web_app
    npm install
    ```
 
-3. Configure as variáveis de ambiente:
-   Crie um arquivo `.env` na raiz do projeto com as chaves necessárias:
+2. **Variáveis de Ambiente**:
+   Crie um `.env` com base no exemplo abaixo:
    ```env
-   DATABASE_URL="sua_string_conexao_postgres"
+   DATABASE_URL="sua_url_postres"
    NEXTAUTH_SECRET="sua_chave_secreta"
    NEXTAUTH_URL="http://localhost:3000"
    ```
 
-4. Configure o banco de dados:
+3. **Database Setup**:
    ```bash
    npx prisma generate
    npx prisma db push
-   # Opcional: Popular com dados iniciais
-   # npx prisma db seed
    ```
 
-5. Inicie o servidor de desenvolvimento:
+4. **Rodar em Desenvolvimento**:
    ```bash
    npm run dev
    ```
 
-6. Acesse `http://localhost:3000`.
+## 🌐 Deploy
 
-## Deploy (Vercel + Neon)
+O projeto está otimizado para deploy na **Vercel**. 
 
-O projeto já está configurado para deploy na Vercel utilizando banco de dados PostgreSQL (Neon, Supabase, etc).
+1. Conecte seu repositório GitHub à Vercel.
+2. Configure as variáveis de ambiente necessárias.
+3. O build e deployment ocorrerão automaticamente em cada push para a `main`.
 
-1. Faça o push do código para o GitHub.
-2. Importe o projeto na Vercel.
-3. Nas configurações do projeto na Vercel, adicione as variáveis de ambiente:
-   - `DATABASE_URL`: String de conexão do seu banco PostgreSQL (ex: Neon).
-   - `NEXTAUTH_SECRET`: Uma string aleatória segura.
-   - `NEXTAUTH_URL`: A URL do seu domínio na Vercel (ex: `https://i9-alpha.vercel.app`).
-4. A Vercel detectará automaticamente o Next.js e fará o build.
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+Desenvolvido com ❤️ por [André Brito](https://github.com/Andre-Brito-py)

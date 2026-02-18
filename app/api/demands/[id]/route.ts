@@ -15,6 +15,7 @@ const demandSchema = z.object({
   prazo: z.string().optional().nullable(),
   descricao: z.string().optional(),
   status: z.string().optional(),
+  evidenceFinish: z.string().optional().nullable(),
 })
 
 export async function PUT(
@@ -22,7 +23,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
-  
+
   if (!session) {
     return new NextResponse("Unauthorized", { status: 401 })
   }
@@ -69,15 +70,15 @@ export async function PUT(
 
     // Permission check for changing assignee
     if (validatedData.assigneeId !== existingDemand.assigneeId) {
-       if (userRole === "BACKOFFICE") {
-         return new NextResponse("Backoffice users cannot reassign demands", { status: 403 })
-       }
-       if (userRole === "SUPERVISOR") {
-         const newAssignee = await prisma.user.findUnique({ where: { id: validatedData.assigneeId } })
-         if (!newAssignee || (newAssignee.role !== "BACKOFFICE" && newAssignee.id !== userId)) {
-            return new NextResponse("Supervisors can only assign to themselves or Backoffice users", { status: 403 })
-         }
-       }
+      if (userRole === "BACKOFFICE") {
+        return new NextResponse("Backoffice users cannot reassign demands", { status: 403 })
+      }
+      if (userRole === "SUPERVISOR") {
+        const newAssignee = await prisma.user.findUnique({ where: { id: validatedData.assigneeId } })
+        if (!newAssignee || (newAssignee.role !== "BACKOFFICE" && newAssignee.id !== userId)) {
+          return new NextResponse("Supervisors can only assign to themselves or Backoffice users", { status: 403 })
+        }
+      }
     }
 
     const demand = await prisma.demand.update({
@@ -91,7 +92,8 @@ export async function PUT(
         urgencia: validatedData.urgencia,
         prazo: validatedData.prazo ? new Date(validatedData.prazo) : null,
         descricao: validatedData.descricao,
-        status: validatedData.status || existingDemand.status
+        status: validatedData.status || existingDemand.status,
+        evidenceFinish: validatedData.evidenceFinish
       }
     })
 
@@ -109,20 +111,20 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-    const session = await getServerSession(authOptions)
-    
-    if (!session || session.user.role !== "ADMIN") {
-      return new NextResponse("Unauthorized", { status: 401 })
-    }
+  const session = await getServerSession(authOptions)
 
-    try {
-        const { id } = await params
-        await prisma.demand.delete({
-            where: { id: parseInt(id) }
-        })
-        return new NextResponse(null, { status: 204 })
-    } catch (error) {
-        console.error("[DEMAND_DELETE]", error)
-        return new NextResponse("Internal Error", { status: 500 })
-    }
+  if (!session || session.user.role !== "ADMIN") {
+    return new NextResponse("Unauthorized", { status: 401 })
+  }
+
+  try {
+    const { id } = await params
+    await prisma.demand.delete({
+      where: { id: parseInt(id) }
+    })
+    return new NextResponse(null, { status: 204 })
+  } catch (error) {
+    console.error("[DEMAND_DELETE]", error)
+    return new NextResponse("Internal Error", { status: 500 })
+  }
 }

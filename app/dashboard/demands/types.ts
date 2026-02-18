@@ -26,4 +26,6 @@ export type DemandColumn = {
   editor: {
     name: string | null
   } | null
+  evidenceOpen: string | null
+  evidenceFinish: string | null
 }

@@ -79,6 +79,8 @@ model Demand {
   prazo          DateTime?
   descricao      String?
   status         String       @default("ABERTA") // ABERTA, EM_ANDAMENTO, CONCLUIDA, CANCELADA, ATRASADA
+  evidenceOpen   String?
+  evidenceFinish String?
   
   subDemands     SubDemand[]
 }
@@ -90,6 +92,7 @@ model SubDemand {
   titulo      String
   descricao   String?
   prazo       DateTime?
+  evidence    String?
   
   subSteps    SubStep[]
 }
